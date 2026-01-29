@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import re
 import string
 import joblib
@@ -14,7 +13,7 @@ st.set_page_config(
 )
 
 # ===============================
-# CUSTOM CSS (Colorful UI)
+# CUSTOM CSS
 # ===============================
 st.markdown("""
 <style>
@@ -32,7 +31,7 @@ h1 {
 .pred-box {
     padding: 20px;
     border-radius: 15px;
-    font-size: 20px;
+    font-size: 22px;
     text-align: center;
     font-weight: bold;
 }
@@ -43,12 +42,11 @@ h1 {
 # TITLE
 # ===============================
 st.markdown("<h1>🧠 Mental Health Sentiment Analysis App</h1>", unsafe_allow_html=True)
-st.write("✨ *AI powered mental health analysis system*")
-
+st.write("✨ *AI-powered Mental Health Analysis System*")
 st.divider()
 
 # ===============================
-# LOAD MODEL & VECTORIZER
+# LOAD MODEL & TOOLS
 # ===============================
 model = joblib.load("mental_health_sentiment_model.pkl")
 vectorizer = joblib.load("tfidf_vectorizer.pkl")
@@ -65,30 +63,9 @@ def clean_text(text):
     return text
 
 # ===============================
-# CLASS MAPPING
-# ===============================
-class_labels = {
-    0: "🟢 Normal",
-    1: "😔 Depressed / Anxious",
-    2: "🚨 Suicidal Ideation",
-    3: "🔄 Bipolar Disorder",
-    4: "😫 Stress",
-    5: "🎭 Personality Disorder"
-}
-
-class_colors = {
-    0: "#c8f7c5",
-    1: "#ffeaa7",
-    2: "#fab1a0",
-    3: "#a29bfe",
-    4: "#fdcb6e",
-    5: "#81ecec"
-}
-
-# ===============================
 # USER INPUT
 # ===============================
-st.subheader("💬 Enter a statement")
+st.subheader("💬 Enter a Statement")
 user_text = st.text_area(
     "📝 Write your thoughts here:",
     placeholder="I feel very lonely and stressed these days...",
@@ -96,7 +73,7 @@ user_text = st.text_area(
 )
 
 # ===============================
-# PREDICTION BUTTON
+# PREDICTION
 # ===============================
 if st.button("🔍 Analyze Mental Health"):
     if user_text.strip() == "":
@@ -107,9 +84,37 @@ if st.button("🔍 Analyze Mental Health"):
         vect = scaler.transform(vect)
 
         prediction = model.predict(vect)[0]
-        label = class_labels[prediction]
-        color = class_colors[prediction]
 
+        # ---------------------------
+        # LABEL & COLOR MAPPING
+        # ---------------------------
+        if prediction.lower() == "normal":
+            label = "🟢 Normal"
+            color = "#c8f7c5"
+
+        elif prediction.lower() in ["depressed", "anxious", "depression", "anxiety"]:
+            label = "😔 Depressed / Anxious"
+            color = "#ffeaa7"
+
+        elif "suicidal" in prediction.lower():
+            label = "🚨 Suicidal Ideation"
+            color = "#fab1a0"
+
+        elif "bipolar" in prediction.lower():
+            label = "🔄 Bipolar Disorder"
+            color = "#a29bfe"
+
+        elif "stress" in prediction.lower():
+            label = "😫 Stress"
+            color = "#fdcb6e"
+
+        else:
+            label = "🎭 Personality Disorder"
+            color = "#81ecec"
+
+        # ---------------------------
+        # RESULT DISPLAY
+        # ---------------------------
         st.markdown(
             f"""
             <div class="pred-box" style="background-color:{color}">
